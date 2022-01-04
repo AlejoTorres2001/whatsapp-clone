@@ -28,8 +28,8 @@ export async function getServerSideProps(context) {
     //grab the messages server side
     const qConstrains = [where("chatId", "==", context.query.id) ,orderBy("timestamp")]
     const q = query(collection(db,"messages"),...qConstrains)
-    const snapshot = getDocs(q)
-    const messages = snapshot.docs?.maps((doc)=>({
+    const snapshot = await getDocs(q)
+    const messages = snapshot.docs?.map((doc)=>({
         id:doc.id,
         ...doc.data()
     })).map(messages =>({
@@ -47,7 +47,7 @@ export async function getServerSideProps(context) {
     console.log(messages)
     return {
         props: {
-            messages: JSON.stringify(messages) || null,
+            messages: JSON.stringify(messages) ,
             chat: chat
         },
     }
