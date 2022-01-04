@@ -15,10 +15,10 @@ import ChatEntry from "./ChatEntry";
 const Sidebar = () => {
   const [user] = useAuthState(auth);
   const chatsRef = collection(db, "chats");
-  const q = query(chatsRef, where("users", "array-contains", user.email));
+  const q = query(chatsRef, where("users", "array-contains", user?.email));
 
   const [chatSnapshot,loading] = useCollection(q);
-  //console.log(chatSnapshot)
+
   const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = (e) => {
@@ -86,7 +86,20 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-const Container = styled.div``;
+const Container = styled.div`
+flex:0.45;
+border-right:1px solid whitesmoke;
+height:100vh;
+min-width:300px;
+max-width:350px;
+overflow-y:scroll;
+
+::-webkit-scrollbar {
+  display: none;
+}
+-ms-overflow-style: none;
+scrollbar-width: none;
+`;
 
 const Header = styled.div`
   display: flex;
