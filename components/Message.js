@@ -6,6 +6,7 @@ const Message = ({to,from,timestamp,message,isOwnerConnected}) => {
         <Container>
             <div className={isOwnerConnected?`sender`:'receiver'}>
             <p>{message}</p>
+            <p>{timestamp}</p>
             </div>
              
         </Container>

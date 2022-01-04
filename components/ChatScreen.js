@@ -29,6 +29,19 @@ const ChatScreen = ({ chat, messages }) => {
                         />
           ))
       }
+      else{
+          const jsonMessages = JSON.parse(messages)
+          return jsonMessages.map((message)=>(
+
+            <Message key={message.id}
+                        from={message.from}
+                        to={message.to}
+                        message={message.message}
+                        timestamp={"awaiting..."}
+                        isOwnerConnected={message.from === user?.email}
+                        />
+          ))
+      }
   };
 
   return (
