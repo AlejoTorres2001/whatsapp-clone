@@ -76,7 +76,7 @@ const Sidebar = () => {
         <SideBarButton onClick={OpenModal}>Start a New Chat</SideBarButton>
         {/* List of chats */}
         {loading?<h1>Loading chats...</h1> : chatSnapshot.docs.map((chat) => {
-            return <ChatEntry key={chat.id} users={chat.data().users}/>
+            return <ChatEntry key={chat.id} id={chat.id} users={chat.data().users}/>
         })}
       </Container>
       <div id="modal-root"></div>
