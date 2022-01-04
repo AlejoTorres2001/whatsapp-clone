@@ -5,7 +5,9 @@ import { Chat } from "@material-ui/icons";
 import { Search } from "@material-ui/icons";
 import Modal from "./Modal";
 import { useState } from "react";
+import { signOut } from "firebase/auth";
 import * as EmailValidator from "email-validator"
+import { auth } from "../firebase";
 const Sidebar = () => {
     const [showModal, setShowModal] = useState(false);
 
@@ -21,7 +23,7 @@ const Sidebar = () => {
         setShowModal(true);
     }
     const CreateNewChat= (email)=>{
-        
+
     }
 
   return (
@@ -38,7 +40,7 @@ const Sidebar = () => {
 
         </Modal>
       <Header>
-        <UserAvatar></UserAvatar>
+        <UserAvatar onClick={()=>signOut(auth)}></UserAvatar>
         <IconsContainer>
           <IconButton>
             <Chat />
