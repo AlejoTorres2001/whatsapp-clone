@@ -5,3 +5,9 @@
     flex-direction: column;
     height: 100vh;
 }
+.sender{
+    background-color: blue;
+}
+.receiver{
+    background-color: red;
+}

@@ -25,6 +25,7 @@ const ChatScreen = ({ chat, messages }) => {
                         to={message.data().to}
                         message={message.data().message}
                         timestamp={message.data().timestamp.toDate().getTime()}
+                        isOwnerConnected={message.data().from === user?.email}
                         />
           ))
       }
