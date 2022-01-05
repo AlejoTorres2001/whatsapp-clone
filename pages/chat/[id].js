@@ -43,8 +43,6 @@ export async function getServerSideProps(context) {
         id:chatDoc.id,
         ...chatDoc.data()
     }
-    console.log(chat)
-    console.log(messages)
     return {
         props: {
             messages: JSON.stringify(messages) ,

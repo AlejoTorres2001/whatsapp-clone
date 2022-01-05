@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import { auth, db } from "../firebase";
@@ -8,7 +8,19 @@ import getRecipientEmail from "../utils/getRecipientEmail";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { AttachFile, InsertEmoticon, Mic } from "@material-ui/icons";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { collection, orderBy, where, query,addDoc,serverTimestamp} from "firebase/firestore";
+import {
+  collection,
+  orderBy,
+  where,
+  query,
+  addDoc,
+  serverTimestamp,
+  setDoc,
+  FieldValue,
+  getDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 import Message from "./Message";
 const ChatScreen = ({ chat, messages }) => {
   const [user] = useAuthState(auth);
@@ -17,21 +29,47 @@ const ChatScreen = ({ chat, messages }) => {
   const q = query(collection(db, "messages"), ...qConstrains);
   const [messagesSnapshot] = useCollection(q);
   const [newMessage, setNewMessage] = useState(null);
+  const [receiverData, setReceiverData] = useState(null);
+  const getReceiverData = () => {
+    const receiver = getRecipientEmail(chat.users, user);
+    //get receiver's data from firebase
+    const q = query(collection(db, "users"), where("email", "==", receiver));
+    const receiverDoc = getDocs(q).then((snapshot) => {
+      const data = snapshot.docs[0]?.data();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (newMessage) {
-                addDoc(collection(db,"messages"), {
-                    chatId: chat.id,
-                    from: user.email,
-                    to: getRecipientEmail(chat.users, user),
-                    message: newMessage,
-                    timestamp: serverTimestamp() || Date().now(),
-                })
-        }
-        setNewMessage('');
+      console.log(data?.lastSeen.toDate().toLocaleString().split(",")[0]);
 
+      setReceiverData({
+        lastConnection: data?.lastSeen.toDate().toLocaleString().split(",")[0],
+        photoURL: data?.photoURL,
+      });
+    });
+  };
+  useEffect(() => {
+    getReceiverData();
+  }, [router.query.id]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newMessage) {
+      addDoc(collection(db, "messages"), {
+        chatId: chat.id,
+        from: user.email,
+        to: getRecipientEmail(chat.users, user),
+        message: newMessage,
+        timestamp: serverTimestamp(),
+      });
+      //Update last seen
+      setDoc(
+        doc(db, "users", user.uid),
+        {
+          lastSeen: serverTimestamp(),
+        },
+        { merge: true }
+      );
     }
+    setNewMessage("");
+  };
   const showMessages = () => {
     if (messagesSnapshot) {
       return messagesSnapshot.docs.map((message) => (
@@ -40,7 +78,9 @@ const ChatScreen = ({ chat, messages }) => {
           from={message.data().from}
           to={message.data().to}
           message={message.data().message}
-          timestamp={message?.data()?.timestamp?.toDate()?.getTime()}
+          timestamp={
+            message?.data()?.timestamp?.toDate().toLocaleString().split(",")[0]
+          }
           isOwnerConnected={message.data().from === user?.email}
         />
       ));
@@ -62,10 +102,15 @@ const ChatScreen = ({ chat, messages }) => {
   return (
     <Container>
       <Header>
-        <Avatar></Avatar>
+        <Avatar src={receiverData?.photoURL}></Avatar>
         <HeaderInformation>
           <h3>{getRecipientEmail(chat.users, user)}</h3>
-          <p>last seen</p>
+          <p>
+            last seen{" "}
+            {receiverData?.lastConnection
+              ? receiverData?.lastConnection
+              : "Awaiting..."}{" "}
+          </p>
         </HeaderInformation>
         <HeaderIcons>
           <IconButton>
