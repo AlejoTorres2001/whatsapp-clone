@@ -28,30 +28,39 @@ const ChatScreen = ({ chat, messages }) => {
   const qConstrains = [where("chatId", "==", chat.id), orderBy("timestamp")];
   const q = query(collection(db, "messages"), ...qConstrains);
   const [messagesSnapshot] = useCollection(q);
-  const [newMessage, setNewMessage] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
   const [receiverData, setReceiverData] = useState(null);
-  const getReceiverData = () => {
+  const getReceiverData = async () => {
     const receiver = getRecipientEmail(chat.users, user);
     //get receiver's data from firebase
     const q = query(collection(db, "users"), where("email", "==", receiver));
-    const receiverDoc = getDocs(q).then((snapshot) => {
-      const data = snapshot.docs[0]?.data();
-
-      console.log(data?.lastSeen.toDate().toLocaleString().split(",")[0]);
-
-      setReceiverData({
-        lastConnection: data?.lastSeen.toDate().toLocaleString().split(",")[0],
-        photoURL: data?.photoURL,
-      });
+    const data = (await getDocs(q)).docs[0]?.data();
+    return data;
+  };
+  const handleReceiverData = async () => {
+    const data = await getReceiverData();
+    setReceiverData({
+      lastConnection: data?.lastSeen.toDate().toLocaleString().split(",")[0],
+      photoURL: data?.photoURL,
     });
   };
   useEffect(() => {
-    getReceiverData();
+    handleReceiverData();
   }, [router.query.id]);
 
+  const setLastSeen = () => {
+    setDoc(
+      doc(db, "users", user.uid),
+      {
+        lastSeen: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newMessage) {
+      //add message to db collection
       addDoc(collection(db, "messages"), {
         chatId: chat.id,
         from: user.email,
@@ -60,17 +69,12 @@ const ChatScreen = ({ chat, messages }) => {
         timestamp: serverTimestamp(),
       });
       //Update last seen
-      setDoc(
-        doc(db, "users", user.uid),
-        {
-          lastSeen: serverTimestamp(),
-        },
-        { merge: true }
-      );
+      setLastSeen();
     }
     setNewMessage("");
   };
   const showMessages = () => {
+    //up to date messages from client side
     if (messagesSnapshot) {
       return messagesSnapshot.docs.map((message) => (
         <Message
@@ -85,6 +89,7 @@ const ChatScreen = ({ chat, messages }) => {
         />
       ));
     } else {
+      //messages from server side
       const jsonMessages = JSON.parse(messages);
       return jsonMessages.map((message) => (
         <Message
