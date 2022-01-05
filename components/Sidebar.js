@@ -17,7 +17,7 @@ const Sidebar = () => {
   const chatsRef = collection(db, "chats");
   const q = query(chatsRef, where("users", "array-contains", user?.email));
 
-  const [chatSnapshot,loading] = useCollection(q);
+  const [chatSnapshot, loading] = useCollection(q);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -59,7 +59,10 @@ const Sidebar = () => {
           </form>
         </Modal>
         <Header>
-          <UserAvatar src={user.photoURL} onClick={() => signOut(auth)}></UserAvatar>
+          <UserAvatar
+            src={user.photoURL}
+            onClick={() => signOut(auth)}
+          ></UserAvatar>
           <IconsContainer>
             <IconButton>
               <Chat />
@@ -75,9 +78,15 @@ const Sidebar = () => {
         </SearchBar>
         <SideBarButton onClick={OpenModal}>Start a New Chat</SideBarButton>
         {/* List of chats */}
-        {loading?<h1>Loading chats...</h1> : chatSnapshot.docs.map((chat) => {
-            return <ChatEntry key={chat.id} id={chat.id} users={chat.data().users}/>
-        })}
+        {loading ? (
+          <h1>Loading chats...</h1>
+        ) : (
+          chatSnapshot.docs.map((chat) => {
+            return (
+              <ChatEntry key={chat.id} id={chat.id} users={chat.data().users} />
+            );
+          })
+        )}
       </Container>
       <div id="modal-root"></div>
     </>
@@ -87,18 +96,18 @@ const Sidebar = () => {
 export default Sidebar;
 
 const Container = styled.div`
-flex:0.45;
-border-right:1px solid whitesmoke;
-height:100vh;
-min-width:300px;
-max-width:350px;
-overflow-y:scroll;
+  flex: 0.45;
+  border-right: 1px solid whitesmoke;
+  height: 100vh;
+  min-width: 300px;
+  max-width: 350px;
+  overflow-y: scroll;
 
-::-webkit-scrollbar {
-  display: none;
-}
--ms-overflow-style: none;
-scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `;
 
 const Header = styled.div`

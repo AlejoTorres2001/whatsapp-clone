@@ -1,5 +1,5 @@
-import Head from 'next/head'
-import Sidebar from '../components/Sidebar'
+import Head from "next/head";
+import Sidebar from "../components/Sidebar";
 export default function Home() {
   return (
     <div>
@@ -10,5 +10,5 @@ export default function Home() {
       </Head>
       <Sidebar></Sidebar>
     </div>
-  )
+  );
 }
