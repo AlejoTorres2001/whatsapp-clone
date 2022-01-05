@@ -18,7 +18,8 @@
     "react-dom": "17.0.2",
     "react-firebase-hooks": "^4.0.1",
     "spinners-react": "^1.0.6",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "timeago-react": "^3.0.4"
   },
   "devDependencies": {
     "eslint": "8.6.0",

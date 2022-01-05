@@ -16,12 +16,11 @@ import {
   addDoc,
   serverTimestamp,
   setDoc,
-  FieldValue,
-  getDoc,
   doc,
   getDocs,
 } from "firebase/firestore";
 import Message from "./Message";
+import TimeAgo from "timeago-react";
 const ChatScreen = ({ chat, messages }) => {
   const [user] = useAuthState(auth);
   const router = useRouter();
@@ -40,7 +39,7 @@ const ChatScreen = ({ chat, messages }) => {
   const handleReceiverData = async () => {
     const data = await getReceiverData();
     setReceiverData({
-      lastConnection: data?.lastSeen.toDate().toLocaleString().split(",")[0],
+      lastConnection: data?.lastSeen.toDate(),
       photoURL: data?.photoURL,
     });
   };
@@ -110,12 +109,22 @@ const ChatScreen = ({ chat, messages }) => {
         <Avatar src={receiverData?.photoURL}></Avatar>
         <HeaderInformation>
           <h3>{getRecipientEmail(chat.users, user)}</h3>
-          <p>
-            last seen{" "}
+          {receiverData ? (
+            <p>
+            last active: {" "}
             {receiverData?.lastConnection
-              ? receiverData?.lastConnection
-              : "Awaiting..."}{" "}
+              ? (<TimeAgo datetime={receiverData?.lastConnection}></TimeAgo>)
+              : "Unavailable"}{" "}
           </p>
+          ):
+          (
+            <p>
+            Awaiting...
+            </p>
+          )
+}
+          
+          
         </HeaderInformation>
         <HeaderIcons>
           <IconButton>
