@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import { auth, db } from "../firebase";
@@ -21,6 +21,7 @@ import {
 } from "firebase/firestore";
 import Message from "./Message";
 import TimeAgo from "timeago-react";
+import moment from "moment";
 const ChatScreen = ({ chat, messages }) => {
   const [user] = useAuthState(auth);
   const router = useRouter();
@@ -29,6 +30,7 @@ const ChatScreen = ({ chat, messages }) => {
   const [messagesSnapshot] = useCollection(q);
   const [newMessage, setNewMessage] = useState("");
   const [receiverData, setReceiverData] = useState(null);
+  const EndOfMessagesRef = useRef(null);
   const getReceiverData = async () => {
     const receiver = getRecipientEmail(chat.users, user);
     //get receiver's data from firebase
@@ -56,6 +58,12 @@ const ChatScreen = ({ chat, messages }) => {
       { merge: true }
     );
   };
+  const scrollToBottom = () => {
+    EndOfMessagesRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newMessage) {
@@ -71,6 +79,7 @@ const ChatScreen = ({ chat, messages }) => {
       setLastSeen();
     }
     setNewMessage("");
+    scrollToBottom();
   };
   const showMessages = () => {
     //up to date messages from client side
@@ -82,9 +91,10 @@ const ChatScreen = ({ chat, messages }) => {
           to={message.data().to}
           message={message.data().message}
           timestamp={
-            message?.data()?.timestamp?.toDate().toLocaleString().split(",")[0]
+            //message?.data()?.timestamp?.toDate().toLocaleString().split(",")[0]
+            moment(message?.data()?.timestamp?.toDate()).format("LT")
           }
-          isOwnerConnected={message.data().from === user?.email}
+          isUserTheOwner={message.data().from === user?.email}
         />
       ));
     } else {
@@ -96,8 +106,8 @@ const ChatScreen = ({ chat, messages }) => {
           from={message.from}
           to={message.to}
           message={message.message}
-          timestamp={"awaiting..."}
-          isOwnerConnected={message.from === user?.email}
+          timestamp={"..."}
+          isUserTheOwner={message.from === user?.email}
         />
       ));
     }
@@ -111,20 +121,16 @@ const ChatScreen = ({ chat, messages }) => {
           <h3>{getRecipientEmail(chat.users, user)}</h3>
           {receiverData ? (
             <p>
-            last active: {" "}
-            {receiverData?.lastConnection
-              ? (<TimeAgo datetime={receiverData?.lastConnection}></TimeAgo>)
-              : "Unavailable"}{" "}
-          </p>
-          ):
-          (
-            <p>
-            Awaiting...
+              last active:{" "}
+              {receiverData?.lastConnection ? (
+                <TimeAgo datetime={receiverData?.lastConnection}></TimeAgo>
+              ) : (
+                "Unavailable"
+              )}{" "}
             </p>
-          )
-}
-          
-          
+          ) : (
+            <p>Awaiting...</p>
+          )}
         </HeaderInformation>
         <HeaderIcons>
           <IconButton>
@@ -137,7 +143,7 @@ const ChatScreen = ({ chat, messages }) => {
       </Header>
       <MessagesContainer>
         {showMessages()}
-        <EndOfMessage></EndOfMessage>
+        <EndOfMessage ref={EndOfMessagesRef}></EndOfMessage>
       </MessagesContainer>
       <InputContainer onSubmit={handleSubmit}>
         <InsertEmoticon></InsertEmoticon>
@@ -180,7 +186,8 @@ const HeaderInformation = styled.div`
 `;
 const HeaderIcons = styled.div``;
 
-const EndOfMessage = styled.div``;
+const EndOfMessage = styled.div`
+margin-bottom: 50px;`;
 const MessagesContainer = styled.div`
   padding: 30px;
   background-color: #e5ded8;

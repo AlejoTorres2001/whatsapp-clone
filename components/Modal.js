@@ -70,6 +70,7 @@ const Modal = ({ show, onClose, children, title }) => {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
     background-color: rgba(0, 0, 0, 0.5);
   `;
   const StyledModalTitle = styled.div`display:flex;
